@@ -38,10 +38,26 @@ if ($synDrivers) {
     Write-Host "  Nenhum pacote de driver Synaptics encontrado no driver store."
 }
 
-Write-Host "`n[4/4] Bloqueando Windows Update de reinstalar drivers automaticamente..."
+Write-Host "`n[4/5] Bloqueando Windows Update de reinstalar drivers automaticamente..."
 $wuPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
 if (-not (Test-Path $wuPath)) { New-Item -Path $wuPath -Force | Out-Null }
 New-ItemProperty -Path $wuPath -Name "ExcludeWUDriversInQualityUpdate" -Value 1 -PropertyType DWord -Force | Out-Null
+
+Write-Host "`n[5/5] Removendo filtro 'SynTP' orfao da classe Teclado (causa o Codigo 19 no teclado interno)..."
+$kbdClassKey = "HKLM:\SYSTEM\CurrentControlSet\Control\Class\{4d36e96b-e325-11ce-bfc1-08002be10318}"
+$upper = (Get-ItemProperty -Path $kbdClassKey -Name UpperFilters -ErrorAction SilentlyContinue).UpperFilters
+if ($upper -and ($upper -contains 'SynTP')) {
+    $cleaned = $upper | Where-Object { $_ -ne 'SynTP' }
+    Set-ItemProperty -Path $kbdClassKey -Name UpperFilters -Value $cleaned -Type MultiString
+    Write-Host "  Filtro 'SynTP' removido da classe Teclado (ficava: $($upper -join ', '))."
+    $kbdDevice = Get-PnpDevice -Class Keyboard -PresentOnly | Where-Object { $_.InstanceId -match '^ACPI\\MSFT0001' }
+    foreach ($kd in $kbdDevice) {
+        pnputil /restart-device "$($kd.InstanceId)" | Out-Null
+        Write-Host "  Dispositivo reiniciado: $($kd.FriendlyName) [$($kd.InstanceId)]"
+    }
+} else {
+    Write-Host "  Nenhum filtro 'SynTP' orfao encontrado na classe Teclado."
+}
 
 Write-Host "`n=== Concluido. Reinicie o notebook para o Windows aplicar o driver generico do touchpad. ===" -ForegroundColor Green
 if (-not $Unattended) { pause }

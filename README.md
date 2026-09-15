@@ -3,6 +3,29 @@
 Scripts para corrigir dois problemas comuns de touchpad/teclado em notebooks
 Positivo/2AM (chassi Clevo/Tongfang) com Windows 11.
 
+## Ordem de execução (importante)
+
+Existem **dois scripts para dois problemas diferentes**. Não são a mesma
+coisa e não precisam ser rodados os dois sempre — siga esta ordem:
+
+| Ordem | Script | Quando rodar |
+|---|---|---|
+| **1º sempre** | `FixTouchpad.cmd` | Corrige o driver Synaptics conflitando com o Windows 11 (cursor pulando/travando/preso num ponto fixo). Rode logo após formatar, ou se o touchpad voltar a se comportar assim. |
+| **2º só se precisar** | `FixInputDevices.cmd` | Só se, **além disso**, teclado e/ou touchpad sumirem/pararem de responder depois que o notebook dorme, hiberna ou desliga/liga rápido. |
+
+Passo a passo:
+
+1. Rode `FixTouchpad.cmd` primeiro (duplo clique, aceite o UAC).
+2. **Reinicie** o notebook.
+3. Teste o touchpad. Se o cursor já está normal (não pula/trava/não fica
+   preso num ponto), o Problema 1 está resolvido — pode parar aqui.
+4. Se, mesmo assim, teclado e/ou touchpad **sumirem depois de
+   dormir/hibernar/desligar rápido**, rode `FixInputDevices.cmd` (duplo
+   clique, aceite o UAC).
+5. Ao final desse, **desligue o notebook completamente** (não apenas
+   reiniciar) e ligue de novo.
+6. Teste teclado e touchpad novamente.
+
 ## Passo a passo (instalação)
 
 1. Baixe/clone este repositório para uma pasta local, ex: `C:\touchpad-fix`.

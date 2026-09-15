@@ -82,6 +82,40 @@ genérico (built-in) do Windows não tem esse problema.
   Windows, antes de instalar qualquer driver de touchpad manualmente)
 - Se o touchpad voltar a pular/travar/ficar preso em um ponto
 
+### Sobre o driver aparecer no Windows Update
+
+Mesmo com o bloqueio (`ExcludeWUDriversInQualityUpdate = 1`) aplicado, o
+driver Synaptics **pode continuar aparecendo** no Windows Update, em
+"Opções avançadas" → "Atualizações opcionais" → "Atualizações de
+driver", disponível para download manual. **Isso é normal** — essa
+chave só impede o Windows de instalar o driver sozinho durante uma
+atualização automática; ela não tira o driver da lista de opcionais.
+
+- Ver o driver listado lá: **normal, sem problema, pode ignorar**.
+- **Nunca clique em "Baixar e instalar" nesse driver Synaptics** — se
+  instalar manualmente, o Problema 1 volta, porque a instalação manual
+  não é bloqueada pela chave, só a automática.
+- Não existe "versão certa" desse driver Synaptics para instalar — a
+  causa é o driver legado em si (não uma versão desatualizada), então o
+  certo é sempre recusar/ignorar essa atualização, qualquer que seja a
+  versão oferecida.
+
+### Se você baixar/instalar o driver ruim por engano
+
+Se acabar instalando o driver Synaptics e o touchpad voltar a
+pular/travar/ficar preso num ponto, é só rodar o `FixTouchpad.cmd` de
+novo — o script é seguro de repetir (idempotente):
+
+1. Abra `C:\Users\gilso\Documents\touchpad`
+2. Dê duplo clique em `FixTouchpad.cmd`
+3. Aceite o UAC
+4. Reinicie o notebook
+5. Teste o touchpad — deve voltar ao normal com o driver genérico do
+   Windows
+
+Se, depois de rodar e reiniciar, o touchpad continuar ruim, o problema
+pode não ser mais o driver Synaptics — investigue outra causa.
+
 ## Problema 2: Teclado e/ou touchpad somem após sleep/hibernar/desligar
 
 Esse é um problema muito comum em notebooks com Windows 11 — muita
@@ -171,3 +205,7 @@ schtasks /Delete /TN "FixTouchpadOnBoot" /F
   ele reinstala o driver problemático
 - Não confiar em calibração de touchpad para o Problema 1 — é de
   driver, não de calibração/hardware
+- Não instalar manualmente o driver Synaptics oferecido como
+  "atualização opcional" no Windows Update — o bloqueio automático não
+  impede instalação manual (veja [Sobre o driver aparecer no Windows
+  Update](#sobre-o-driver-aparecer-no-windows-update))

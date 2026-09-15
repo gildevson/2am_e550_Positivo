@@ -81,11 +81,11 @@ com o notebook desligado da tomada) ou procure assistência técnica.
 | `FixTouchpad.ps1` | Lógica em PowerShell chamada pelo `FixTouchpad.cmd` |
 | `FixInputDevices.cmd` | Corrige teclado/touchpad sumindo após sleep (Problema 2) |
 | `FixInputDevices.ps1` | Lógica em PowerShell chamada pelo `FixInputDevices.cmd` |
-| `Setup.cmd` | **NÃO EXECUTAR** — instalador do driver antigo que causa o problema 1 |
-| `E550_TOUCHPAD.zip`, `Syn*.dll/inf/sys/exe` | Arquivos do driver antigo (mantidos só como referência) |
+| `E550_TOUCHPAD.zip` | **NÃO EXTRAIR/EXECUTAR** — pacote completo do driver antigo (Setup.cmd + Syn\*/Smb_driver\*), mantido zipado só como referência do que causa o Problema 1 |
 
 ## Não fazer
 
-- Não rodar `Setup.cmd` de novo — ele reinstala o driver problemático
+- Não extrair/rodar `Setup.cmd` de dentro do `E550_TOUCHPAD.zip` —
+  ele reinstala o driver problemático
 - Não confiar em calibração de touchpad para o Problema 1 — é de
   driver, não de calibração/hardware

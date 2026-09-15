@@ -3,6 +3,8 @@
 # e bloqueia o Windows Update de reinstala-los sozinho.
 # Rode este script sempre apos formatar o notebook, ou se o problema do touchpad voltar.
 
+param([switch]$Unattended)
+
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     exit
@@ -42,4 +44,4 @@ if (-not (Test-Path $wuPath)) { New-Item -Path $wuPath -Force | Out-Null }
 New-ItemProperty -Path $wuPath -Name "ExcludeWUDriversInQualityUpdate" -Value 1 -PropertyType DWord -Force | Out-Null
 
 Write-Host "`n=== Concluido. Reinicie o notebook para o Windows aplicar o driver generico do touchpad. ===" -ForegroundColor Green
-pause
+if (-not $Unattended) { pause }

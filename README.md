@@ -1,5 +1,21 @@
 # Fix Touchpad Synaptics x Windows 11
 
+Scripts para corrigir dois problemas comuns de touchpad/teclado em notebooks
+Positivo/2AM (chassi Clevo/Tongfang) com Windows 11.
+
+## Passo a passo (instalação)
+
+1. Baixe/clone este repositório para uma pasta local, ex: `C:\touchpad-fix`.
+2. Abra a pasta e identifique qual problema você tem (veja as seções
+   [Problema 1](#problema-1-driver-synaptics-conflitando-com-windows-11) e
+   [Problema 2](#problema-2-teclado-eou-touchpad-somem-após-sleephibernardesligar)
+   abaixo).
+3. Rode o `.cmd` correspondente com duplo clique e aceite o UAC.
+4. Reinicie o notebook e teste o touchpad/teclado.
+5. (Opcional, recomendado) Configure a [execução automática na
+   inicialização](#automatizar-na-inicialização) para o Windows Update não
+   conseguir trazer o problema de volta sem você perceber.
+
 ## Problema 1: Driver Synaptics conflitando com Windows 11
 
 Notebook Positivo com touchpad Synaptics (driver antigo, feito para
@@ -18,7 +34,7 @@ Causa raiz: driver Synaptics legado (`synpd.inf`, `synhidmini.inf`,
 coordenadas de toque para a API de touchpad do Windows 11. O driver
 genérico (built-in) do Windows não tem esse problema.
 
-## Solução
+### Solução
 
 1. Remover o dispositivo de touchpad Synaptics ativo
 2. Apagar os pacotes de driver Synaptics do driver store do Windows
@@ -30,14 +46,14 @@ genérico (built-in) do Windows não tem esse problema.
    (`ExcludeWUDriversInQualityUpdate = 1`), para o driver ruim não
    voltar sozinho numa atualização futura
 
-## Como usar
+### Como usar
 
 1. Rode `FixTouchpad.cmd` (duplo clique)
 2. Aceite o prompt do UAC (permissão de administrador)
 3. Reinicie o notebook quando o script terminar
 4. Teste o touchpad
 
-## Quando usar
+### Quando usar
 
 - Depois de formatar o notebook (rode uma vez após configurar o
   Windows, antes de instalar qualquer driver de touchpad manualmente)
@@ -73,12 +89,55 @@ do Embedded Controller (hardware) — nesse caso, tente um reset de EC
 (remover a bateria, se possível, e segurar o botão de power por 15s
 com o notebook desligado da tomada) ou procure assistência técnica.
 
+## Automatizar na inicialização
+
+O `FixTouchpad.ps1` já bloqueia o Windows Update de reinstalar drivers
+(passo 4 da solução), mas, como garantia extra, dá para agendar o script
+para rodar sozinho toda vez que o Windows iniciar — sem UAC, sem janela
+visível, sem precisar lembrar de rodar de novo.
+
+O script aceita um parâmetro `-Unattended` que pula o `pause` final
+(necessário para rodar em segundo plano, sem travar esperando um
+"pressione uma tecla" que nunca vai chegar).
+
+1. Ajuste o caminho abaixo para onde você colocou a pasta.
+2. Abra um **PowerShell como Administrador** (Iniciar → digite
+   `PowerShell` → botão direito → "Executar como administrador").
+3. Cole o comando (tudo em uma linha só):
+
+   ```powershell
+   schtasks /Create /TN "FixTouchpadOnBoot" /TR "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\caminho\para\touchpad\FixTouchpad.ps1 -Unattended" /SC ONSTART /RU SYSTEM /RL HIGHEST /F
+   ```
+
+4. Confirme que a tarefa foi criada:
+
+   ```powershell
+   schtasks /Query /TN "FixTouchpadOnBoot" /V /FO LIST
+   ```
+
+   Deve aparecer `Executar como Usuário: SISTEMA` e
+   `Tipo de Agendamento: Na inicialização do sistema`.
+
+5. (Opcional) Teste sem reiniciar:
+
+   ```powershell
+   schtasks /Run /TN "FixTouchpadOnBoot"
+   ```
+
+   Depois rode o `Query` de novo e confira `Último resultado: 0`.
+
+Para remover a automação depois, rode (também como Administrador):
+
+```powershell
+schtasks /Delete /TN "FixTouchpadOnBoot" /F
+```
+
 ## Arquivos
 
 | Arquivo | Descrição |
 |---|---|
 | `FixTouchpad.cmd` | Corrige o conflito de driver Synaptics (Problema 1) |
-| `FixTouchpad.ps1` | Lógica em PowerShell chamada pelo `FixTouchpad.cmd` |
+| `FixTouchpad.ps1` | Lógica em PowerShell chamada pelo `FixTouchpad.cmd`. Aceita `-Unattended` para rodar sem pausa (uso em tarefa agendada) |
 | `FixInputDevices.cmd` | Corrige teclado/touchpad sumindo após sleep (Problema 2) |
 | `FixInputDevices.ps1` | Lógica em PowerShell chamada pelo `FixInputDevices.cmd` |
 | `E550_TOUCHPAD.zip` | **NÃO EXTRAIR/EXECUTAR** — pacote completo do driver antigo (Setup.cmd + Syn\*/Smb_driver\*), mantido zipado só como referência do que causa o Problema 1 |

@@ -1,9 +1,9 @@
-# Fix Touchpad Synaptics x Windows 11
+# Fix Touchpad Synaptics x Windows 11 - 2AM E550
 
 Scripts para notebooks Positivo/2AM (chassi Clevo/Tongfang) com Windows 11.
 
 ## Passo a passo
-
+  
 1. Rode `FixTouchpad.cmd` (duplo clique, aceite o UAC). Corrige o cursor
    pulando/travando/preso num ponto. **Reinicie** o notebook ao final.
 2. Rode `HideTouchpadUpdate.cmd` (duplo clique, aceite o UAC). Faz a

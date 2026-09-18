@@ -18,77 +18,101 @@ $dir = Split-Path -Parent $PSCommandPath
 function Show-SuccessDialog {
     param(
         [string]$Title = "Instalacao concluida",
-        [string]$Message = "Tudo certo!"
+        [string]$Message = "Tudo certo!",
+        [string]$BannerPath
     )
 
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
 
-    # Desenha um icone de "sucesso" (circulo verde com check) em memoria,
-    # sem depender de nenhum arquivo de imagem externo.
-    $size = 96
-    $icon = New-Object System.Drawing.Bitmap($size, $size)
-    $g = [System.Drawing.Graphics]::FromImage($icon)
-    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-    $g.Clear([System.Drawing.Color]::Transparent)
-    $greenBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(46, 204, 113))
-    $g.FillEllipse($greenBrush, 0, 0, $size, $size)
-    $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::White, 8)
-    $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
-    $pen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
-    $points = @(
-        (New-Object System.Drawing.Point([int]($size * 0.26), [int]($size * 0.52))),
-        (New-Object System.Drawing.Point([int]($size * 0.42), [int]($size * 0.68))),
-        (New-Object System.Drawing.Point([int]($size * 0.76), [int]($size * 0.32)))
-    )
-    $g.DrawLines($pen, $points)
-    $g.Dispose()
+    $bgColor = [System.Drawing.Color]::FromArgb(18, 18, 24)
+    $accentColor = [System.Drawing.Color]::FromArgb(124, 58, 237)
+    $titleColor = [System.Drawing.Color]::White
+    $msgColor = [System.Drawing.Color]::FromArgb(170, 170, 185)
+
+    $banner = $null
+    if ($BannerPath -and (Test-Path $BannerPath)) {
+        try { $banner = [System.Drawing.Image]::FromFile($BannerPath) } catch { $banner = $null }
+    }
+
+    $width = 460
+    $bannerHeight = if ($banner) { [int]($width * $banner.Height / $banner.Width) } else { 0 }
+    $iconSize = 44
+    $contentTop = $bannerHeight + 16 + $iconSize + 12
 
     $form = New-Object System.Windows.Forms.Form
     $form.AutoScaleMode = [System.Windows.Forms.AutoScaleMode]::None
     $form.Text = $Title
-    $form.ClientSize = New-Object System.Drawing.Size(420, 300)
+    $form.ClientSize = New-Object System.Drawing.Size($width, ($contentTop + 190))
     $form.StartPosition = "CenterScreen"
     $form.FormBorderStyle = "FixedDialog"
     $form.MaximizeBox = $false
     $form.MinimizeBox = $false
-    $form.BackColor = [System.Drawing.Color]::White
+    $form.BackColor = $bgColor
     $form.TopMost = $true
 
-    $pic = New-Object System.Windows.Forms.PictureBox
-    $pic.Image = $icon
-    $pic.SizeMode = "Zoom"
-    $pic.Size = New-Object System.Drawing.Size($size, $size)
-    $pic.Location = New-Object System.Drawing.Point((($form.ClientSize.Width - $size) / 2), 24)
-    $form.Controls.Add($pic)
+    if ($banner) {
+        $pic = New-Object System.Windows.Forms.PictureBox
+        $pic.Image = $banner
+        $pic.SizeMode = "Zoom"
+        $pic.Size = New-Object System.Drawing.Size($width, $bannerHeight)
+        $pic.Location = New-Object System.Drawing.Point(0, 0)
+        $form.Controls.Add($pic)
+    }
+
+    # Icone de sucesso (circulo verde com check), centralizado, abaixo do banner
+    # - nunca sobrepoe a foto nem o texto.
+    $icon = New-Object System.Drawing.Bitmap($iconSize, $iconSize)
+    $g = [System.Drawing.Graphics]::FromImage($icon)
+    $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+    $g.Clear([System.Drawing.Color]::Transparent)
+    $g.FillEllipse((New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(46, 204, 113))), 0, 0, $iconSize, $iconSize)
+    $pen = New-Object System.Drawing.Pen([System.Drawing.Color]::White, 4)
+    $pen.StartCap = [System.Drawing.Drawing2D.LineCap]::Round
+    $pen.EndCap = [System.Drawing.Drawing2D.LineCap]::Round
+    $g.DrawLines($pen, @(
+        (New-Object System.Drawing.Point([int]($iconSize * 0.26), [int]($iconSize * 0.52))),
+        (New-Object System.Drawing.Point([int]($iconSize * 0.42), [int]($iconSize * 0.68))),
+        (New-Object System.Drawing.Point([int]($iconSize * 0.76), [int]($iconSize * 0.32)))
+    ))
+    $g.Dispose()
+
+    $picIcon = New-Object System.Windows.Forms.PictureBox
+    $picIcon.Image = $icon
+    $picIcon.SizeMode = "Zoom"
+    $picIcon.Size = New-Object System.Drawing.Size($iconSize, $iconSize)
+    $picIcon.Location = New-Object System.Drawing.Point((($width - $iconSize) / 2), ($bannerHeight + 16))
+    $form.Controls.Add($picIcon)
 
     $lblTitle = New-Object System.Windows.Forms.Label
     $lblTitle.Text = $Title
     $lblTitle.Font = New-Object System.Drawing.Font("Segoe UI", 14, [System.Drawing.FontStyle]::Bold)
-    $lblTitle.ForeColor = [System.Drawing.Color]::FromArgb(33, 33, 33)
+    $lblTitle.ForeColor = $titleColor
+    $lblTitle.BackColor = [System.Drawing.Color]::Transparent
     $lblTitle.TextAlign = "MiddleCenter"
-    $lblTitle.Size = New-Object System.Drawing.Size(380, 32)
-    $lblTitle.Location = New-Object System.Drawing.Point(20, 130)
+    $lblTitle.Size = New-Object System.Drawing.Size(($width - 40), 32)
+    $lblTitle.Location = New-Object System.Drawing.Point(20, $contentTop)
     $form.Controls.Add($lblTitle)
 
     $lblMsg = New-Object System.Windows.Forms.Label
     $lblMsg.Text = $Message
     $lblMsg.Font = New-Object System.Drawing.Font("Segoe UI", 10)
-    $lblMsg.ForeColor = [System.Drawing.Color]::FromArgb(90, 90, 90)
+    $lblMsg.ForeColor = $msgColor
+    $lblMsg.BackColor = [System.Drawing.Color]::Transparent
     $lblMsg.TextAlign = "MiddleCenter"
-    $lblMsg.Size = New-Object System.Drawing.Size(380, 80)
-    $lblMsg.Location = New-Object System.Drawing.Point(20, 166)
+    $lblMsg.Size = New-Object System.Drawing.Size(($width - 40), 80)
+    $lblMsg.Location = New-Object System.Drawing.Point(20, ($contentTop + 36))
     $form.Controls.Add($lblMsg)
 
     $btn = New-Object System.Windows.Forms.Button
     $btn.Text = "OK"
     $btn.Font = New-Object System.Drawing.Font("Segoe UI", 10, [System.Drawing.FontStyle]::Bold)
     $btn.ForeColor = [System.Drawing.Color]::White
-    $btn.BackColor = [System.Drawing.Color]::FromArgb(46, 204, 113)
+    $btn.BackColor = $accentColor
     $btn.FlatStyle = "Flat"
     $btn.FlatAppearance.BorderSize = 0
-    $btn.Size = New-Object System.Drawing.Size(120, 36)
-    $btn.Location = New-Object System.Drawing.Point((($form.ClientSize.Width - 120) / 2), 250)
+    $btn.Size = New-Object System.Drawing.Size(130, 38)
+    $btn.Location = New-Object System.Drawing.Point((($width - 130) / 2), ($contentTop + 128))
     $btn.DialogResult = [System.Windows.Forms.DialogResult]::OK
     $form.Controls.Add($btn)
     $form.AcceptButton = $btn
@@ -96,6 +120,7 @@ function Show-SuccessDialog {
     $form.ShowDialog() | Out-Null
     $form.Dispose()
     $icon.Dispose()
+    if ($banner) { $banner.Dispose() }
 }
 
 Write-Host "=== Instalacao completa (notebook Positivo/2AM - Windows 11) ===" -ForegroundColor Cyan
@@ -112,5 +137,5 @@ Write-Host "`n--- [3/3] Corrigindo teclado/touchpad apos sleep/hibernar/desligar
 Write-Host "`n=== Tudo pronto! Desligue o notebook completamente (nao so reiniciar) e ligue de novo. ===" -ForegroundColor Green
 
 if (-not $Unattended) {
-    Show-SuccessDialog -Title "Instalacao concluida!" -Message "Todos os passos foram aplicados com sucesso.`n`nDesligue o notebook completamente (nao so reiniciar) e ligue de novo."
+    Show-SuccessDialog -Title "Instalacao concluida!" -Message "Todos os passos foram aplicados com sucesso.`n`nDesligue o notebook completamente (nao so reiniciar) e ligue de novo." -BannerPath (Join-Path $dir "2am-e550.png")
 }

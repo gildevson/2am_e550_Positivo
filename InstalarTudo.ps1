@@ -1,9 +1,9 @@
-# Roda os tres scripts de correcao em sequencia (touchpad + Windows Update +
-# teclado/touchpad apos sleep), sem precisar abrir cada um manualmente.
+# Roda os quatro scripts de correcao em sequencia (touchpad + Windows Update +
+# teclado/touchpad apos sleep + suspensao -> hibernar), sem abrir cada um manualmente.
 # So pede UAC uma vez, no inicio; os scripts chamados em seguida ja herdam
 # essa elevacao e nao pedem de novo.
 #
-# Nao altera FixTouchpad.ps1, HideTouchpadUpdate.ps1 ou FixInputDevices.ps1 -
+# Nao altera FixTouchpad.ps1, HideTouchpadUpdate.ps1, FixInputDevices.ps1 ou FixTouchpadSleep.ps1 -
 # so chama cada um deles na ordem certa.
 
 param([switch]$Unattended)
@@ -125,14 +125,17 @@ function Show-SuccessDialog {
 
 Write-Host "=== Instalacao completa (notebook Positivo/2AM - Windows 11) ===" -ForegroundColor Cyan
 
-Write-Host "`n--- [1/3] Corrigindo driver do touchpad ---" -ForegroundColor Cyan
+Write-Host "`n--- [1/4] Corrigindo driver do touchpad ---" -ForegroundColor Cyan
 & "$dir\FixTouchpad.ps1" -Unattended
 
-Write-Host "`n--- [2/3] Ocultando atualizacao do driver Synaptics no Windows Update ---" -ForegroundColor Cyan
+Write-Host "`n--- [2/4] Ocultando atualizacao do driver Synaptics no Windows Update ---" -ForegroundColor Cyan
 & "$dir\HideTouchpadUpdate.ps1" -Unattended
 
-Write-Host "`n--- [3/3] Corrigindo teclado/touchpad apos sleep/hibernar/desligar ---" -ForegroundColor Cyan
+Write-Host "`n--- [3/4] Corrigindo teclado/touchpad apos sleep/hibernar/desligar ---" -ForegroundColor Cyan
 & "$dir\FixInputDevices.ps1"
+
+Write-Host "`n--- [4/4] Trocando suspensao por hibernacao (touchpad travando ao acordar) ---" -ForegroundColor Cyan
+& "$dir\FixTouchpadSleep.ps1" -Unattended
 
 Write-Host "`n=== Tudo pronto! Desligue o notebook completamente (nao so reiniciar) e ligue de novo. ===" -ForegroundColor Green
 

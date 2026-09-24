@@ -14,7 +14,8 @@ Write-Host "=== Corretor de Teclado/Touchpad (sleep/resume, Windows 11) ===" -Fo
 Write-Host "`n[1/3] Desativando Inicializacao Rapida (Fast Startup)..."
 $powerPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Session Manager\Power"
 New-ItemProperty -Path $powerPath -Name "HiberbootEnabled" -Value 0 -PropertyType DWord -Force | Out-Null
-powercfg /hibernate off
+# Nao desliga a hibernacao (powercfg /hibernate off): FixTouchpadSleep.ps1 usa
+# hibernar no lugar da suspensao. HiberbootEnabled = 0 ja desliga o Fast Startup.
 
 Write-Host "`n[2/3] Desativando 'permitir que o computador desligue este dispositivo' para teclado/touchpad/HID..."
 $targets = Get-PnpDevice -PresentOnly | Where-Object {

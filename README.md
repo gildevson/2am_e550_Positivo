@@ -16,15 +16,21 @@ Scripts para notebooks Positivo/2AM (chassi Clevo/Tongfang) com Windows 11.
 
 1. Dentro da pasta, dê **duplo clique em `InstalarTudo.cmd`**
 2. Vai aparecer um aviso do Windows (UAC) pedindo permissão — clique em **"Sim"**
-3. Uma janela preta abre e mostra o progresso automaticamente (3 passos)
+3. Uma janela preta abre e mostra o progresso automaticamente (4 passos)
 4. No final aparece uma tela escura com a foto do notebook e um check
    verde dizendo **"Instalação concluída!"** — clique em **OK**
 5. **Desligue o notebook completamente** (não só reiniciar) e ligue de novo
 6. Teste o touchpad e o teclado
 
 Isso já corrige o driver do touchpad, oculta a atualização problemática
-no Windows Update e corrige teclado/touchpad sumindo após dormir — os
-três problemas de uma vez só.
+no Windows Update, corrige teclado/touchpad sumindo após dormir e evita
+o touchpad travar ao acordar da suspensão — tudo de uma vez só.
+
+> **Atenção:** depois de instalar, o notebook **não suspende mais, ele
+> hiberna**. Parado, só a tela apaga (na bateria, hiberna após 30 min).
+> Fechar a tampa ou apertar o botão de energia faz hibernar. Para voltar,
+> aperte o botão de energia — demora uns 10 a 20 segundos, mas o touchpad
+> volta funcionando.
 
 ## Passo a passo (rodando um script por vez)
 
@@ -39,7 +45,10 @@ Se preferir rodar cada correção separada em vez do instalador completo:
    `FixInputDevices.cmd` (duplo clique, aceite o UAC). Ao final,
    **desligue completamente** o notebook (não só reiniciar) e ligue de
    novo.
-4. Teste o teclado e o touchpad.
+4. Só se o touchpad **travar quando o notebook volta do descanso/
+   suspensão** (e só voltar reiniciando): rode `FixTouchpadSleep.cmd`
+   (duplo clique, aceite o UAC). Troca a suspensão por hibernação.
+5. Teste o teclado e o touchpad.
 
 ## Automatizar (opcional, recomendado)
 
@@ -57,9 +66,10 @@ Ajuste `C:\caminho\para\touchpad` para onde a pasta está.
 
 | Arquivo | Descrição |
 |---|---|
-| `InstalarTudo.cmd` / `.ps1` | Roda as três correções abaixo em sequência, com tela final de aviso |
+| `InstalarTudo.cmd` / `.ps1` | Roda as quatro correções abaixo em sequência, com tela final de aviso |
 | `FixTouchpad.cmd` / `.ps1` | Corrige o conflito de driver Synaptics (cursor pulando/travando/preso) |
 | `HideTouchpadUpdate.cmd` / `.ps1` | Oculta a atualização "Synaptics - Mouse" do Windows Update |
 | `FixInputDevices.cmd` / `.ps1` | Corrige teclado/touchpad sumindo após sleep/hibernar/desligar |
+| `FixTouchpadSleep.cmd` / `.ps1` | Troca suspensão por hibernação (touchpad PS/2 travava ao acordar da suspensão) |
 | `2am-e550.png` | Foto do notebook usada no README e na tela final do `InstalarTudo` |
 | `E550_TOUCHPAD.zip` | Pacote do driver antigo, mantido só como referência (não usar) |
